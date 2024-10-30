@@ -1,7 +1,7 @@
 
 # TAIL-APP
 
-<img align="left" alt="tail-app | img" width="100%" style="max-width: 100%;" src="" />
+<img align="left" alt="tail-app | img" width="100%" style="max-width: 100%;" src="https://github.com/Vladimir-Grinko/tail-app/blob/master/public/tail-log.png" />
 
 ### Сервис просмотров логов
 
@@ -35,7 +35,7 @@ npm install
 
 Перед стартом убедитесь, что файл с логами находится в папке logs и правильно назван.
 Если название файла не соответствует, то, либо переименуйте файл, либо в файле "package.json" 
-в стоке "start": "node app.js /logs/test.log" - "test.log" замените на название вашего файла.
+в строке "start": "node app.js /logs/test.log" - "test.log" замените на название вашего файла.
 
 Теперь можно начинать.
 
