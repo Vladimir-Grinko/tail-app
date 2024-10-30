@@ -1,0 +1,275 @@
+<!DOCTYPE html>
+<html lang="ru">
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="icon" href="/favicon.ico" />
+
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Сервис просмотра логов</title>
+  </head>
+  <style>
+    /* стили preloader */
+    .preloader {
+      position: fixed;
+      left: 0;
+      top: 0;
+      right: 0;
+      bottom: 0;
+      background: #e0e0e0;
+      z-index: 1001;
+    }
+
+    .preloader__wrapper {
+      position: relative;
+      top: 50%;
+      left: 50%;
+      width: 70px;
+      height: 70px;
+      margin-top: -35px;
+      margin-left: -35px;
+      text-align: center;
+      animation: preloader-rotate 3s infinite linear;
+    }
+
+    .preloader__item {
+      position: absolute;
+      display: inline-block;
+      top: 0;
+      background-color: #1a23e93b;
+      border-radius: 100%;
+      width: 35px;
+      height: 35px;
+      animation: preloader-bounce 4s infinite ease-in-out;
+    }
+
+    .preloader__item:nth-child(1) {
+      animation-delay: -1s;
+    }
+
+    .preloader__item:nth-child(2) {
+      left: 0;
+      animation-delay: -2s;
+    }
+
+    .preloader__item:nth-child(3) {
+      left: 0;
+      bottom: 0;
+      top: auto;
+      animation-delay: -3s;
+    }
+
+    .preloader__item:last-child {
+      top: auto;
+      bottom: 0;
+      animation-delay: -4s;
+    }
+
+    @keyframes preloader-rotate {
+      100% {
+        transform: rotate(360deg);
+      }
+    }
+
+    @keyframes preloader-bounce {
+      0%,
+      100% {
+        transform: scale(0);
+      }
+
+      50% {
+        transform: scale(1);
+      }
+    }
+
+    .loaded_hiding .preloader {
+      transition: 0.3s opacity;
+      opacity: 0;
+    }
+
+    /* основные стили */
+    body {
+      color: #1a2c37;
+      font-family: "Helvetica", sans-serif;
+      padding: 15px;
+      background: linear-gradient(90deg, #f0e0e9, #e9d3d5, #e0c7dc);
+    }
+
+    @media only screen and (orientation: portrait) and (min-device-width: 375px) and (max-device-width: 667px) and (-webkit-min-device-pixel-ratio: 2) {
+      button {
+        margin-top: 15px;
+      }
+    }
+
+    #info {
+      font-size: 120%;
+      font-weight: bold;
+    }
+    #tail {
+      border-radius: 8px;
+      border: 1px solid #1a2c37;
+      height: calc(100vh - 196px);
+      width: 100%;
+      padding: 15px;
+      overflow: hidden;
+      position: relative;
+      overflow-y: scroll;
+      overflow-x: scroll;
+    }
+
+    #app {
+      display: flex;
+      justify-content: center;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    .title {
+      margin: 10px;
+      font-size: 18px;
+      font-weight: 400;
+      border-bottom: #1a2c37 1px solid;
+    }
+
+    .loaded {
+      display: none;
+    }
+
+    .form {
+      margin: 10px;
+      display: flex;
+      border-radius: 8px;
+      border: 1px solid #1a2c37;
+    }
+
+    input {
+      width: 100px;
+      font-size: 18px;
+      padding: 6px 0 4px 10px;
+      border: 1px solid #cecece;
+      background: #f6f6f6;
+      border-radius: 8px;
+    }
+
+    span {
+      color: #666;
+    }
+    .input-container {
+      margin: 8px;
+    }
+
+    .button-container {
+      margin: 8px;
+    }
+
+    #buttonStart {
+      width: 90px;
+      height: 32px;
+      border: 1px solid #ccc;
+      background: #fff;
+      color: #666;
+      border-radius: 5px;
+      box-shadow: inset 0 2px 2px #ccc;
+      cursor: pointer;
+      font-size: 18px;
+    }
+
+    #buttonClose {
+      width: 105px;
+      height: 32px;
+      border: 1px solid #ccc;
+      background: #fff;
+      color: #666;
+      border-radius: 5px;
+      box-shadow: inset 0 2px 2px #ccc;
+      cursor: pointer;
+      font-size: 18px;
+    }
+
+    .click {
+      transform: scale(1.1);
+      background: linear-gradient(90deg, #f0e0e9, #e9d3d5, #e0c7dc);
+    }
+    #buttonStart:hover {
+      box-shadow: 0 0 2px #ccc;
+      background: #ccc;
+    }
+
+    #buttonClose:hover {
+      box-shadow: 0 0 2px #ccc;
+      background: #ff0000;
+    }
+  </style>
+  <body>
+    <div id="preloader" class="preloader">
+      <div class="preloader__wrapper">
+        <div class="preloader__item"></div>
+        <div class="preloader__item"></div>
+        <div class="preloader__item"></div>
+        <div class="preloader__item"></div>
+      </div>
+    </div>
+    <div id="app">
+      <div class="title">Сервис просмотра логов</div>
+      <div class="form">
+        <div
+          class="input-container"
+          title="Введите необходимое количество последних строк"
+        >
+          <span>Количество строк:</span>
+          <input type="number" id="input" name="input" value="10" />
+        </div>
+        <div class="button-container" title="Начать просмотр логов">
+          <button id="buttonStart">Начать</button>
+        </div>
+      </div>
+      <div id="tail"></div>
+    </div>
+
+    <script>
+      // действия с прелоадером
+      let preloader = document.getElementById("preloader");
+      setTimeout(() => {
+        preloader.className = "loaded";
+      }, 1000);
+      // действия при нажатии на кнопку "Начать"
+      document.getElementById("buttonStart").onclick = function () {
+        this.className = "click";
+        // соединение WebSocket
+        const origin = window.location.origin;
+        const socket = new WebSocket(origin);
+
+        // элемент вывода логов
+        const messagesDiv = document.getElementById("tail");
+        messagesDiv.innerHTML = "";
+        // переменная значения инпута
+        let value = document.getElementById("input").value;
+
+        // установка сединения и отправка значения количества строк
+        socket.onopen = () => {
+          console.log("Соединение установлено");
+          socket.send(value);
+        };
+
+        // получение ответа от сервера
+        socket.onmessage = (event) => {
+          // разбивка текста на строки
+          let splitText = event.data.split("\n");
+
+          if (splitText.length !== 0) {
+            splitText.forEach((row) => {
+              const newMessage = document.createElement("div");
+              newMessage.textContent = `Сервер: ${row}`;
+
+              messagesDiv.appendChild(newMessage);
+            });
+          }
+        };
+
+        // отмена присвоения класса после клика
+        setTimeout(() => {
+          this.className = "";
+        }, 100);
+      };
+    </script>
+  </body>
+</html>

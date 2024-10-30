@@ -1,0 +1,15 @@
+{
+  "name": "tail-app",
+  "version": "0.0.1",
+  "private": true,
+  "author": "Grinko Vladimir",
+  "scripts": {
+    "start": "node app.js /logs/test.log"
+  },
+  "dependencies": {
+    "ws": "^8.18.0"
+  },
+  "optionalDependencies": {
+    "bufferutil": "^4.0.8"
+  }
+}
